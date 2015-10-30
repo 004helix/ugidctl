@@ -1,0 +1,165 @@
+v0.1.1
+
+I. Getting access key
+
+    SYNOPSIS
+
+    ioctl(fd, UGIDCTLIO_GETKEY, struct ugidctl_key_rq *request);
+
+    struct ugidctl_key_rq
+    {
+        __u8 key[32];        /* access key */
+    };
+
+    DESCRIPTION
+
+    This function save the associated access key for this file descriptor
+    in the "key" field of request.
+
+    Both CAP_SETUID and CAP_SETGID capabilities are required.
+
+    RETURNS
+
+    This function returns 0 if no errors occur. If an error occurs, -1
+    is returned and errno is set appropriately:
+
+        EPERM      The calling process does not have the CAP_SETUID and
+                   CAP_SETGID capabilities
+        EFAULT     request references an inaccessible memory area
+
+II. Getting / setting pid check type
+
+    SYNOPSIS
+
+    ioctl(fd, UGIDCTLIO_GETPIDCHKTYPE);
+    ioctl(fd, UGIDCTLIO_SETPIDCHKTYPE, pid_check_type);
+
+    DESCRIPTION
+
+    This functions returns pid check type for the subsequent unprivileged
+    calls, i.e. UGIDCTLIO_SETUID, UGIDCTLIO_SETGID and UGIDCTLIO_SETGROUPS.
+
+    If the command is UGIDCTLIO_SETPIDCHKTYPE, then the new pid check type is
+    also set. The appropriate pid, group or session id of the calling process
+    will be used in the subsequent checks.
+
+    Both CAP_SETUID and CAP_SETGID capabilities are required.
+
+    RETURNS
+
+    This functions returns the pid check type:
+
+        UGIDCTL_PIDTYPE_PID   for the process ID check
+        UGIDCTL_PIDTYPE_PGID  for the process group ID check
+        UGIDCTL_PIDTYPE_SID   for the process session ID check
+
+    If an error occurs, -1 is returned and errno is set appropriately:
+
+        EPERM      The calling process does not have the CAP_SETUID and
+                   CAP_SETGID capabilities
+        EINVAL     pid_check_type is not valid
+
+III. Adding UIDs / GIDs
+
+    ioctl(fd, UGIDCTLIO_ADDUIDLIST, struct ugidctl_add_rq *request);
+    ioctl(fd, UGIDCTLIO_ADDGIDLIST, struct ugidctl_add_rq *request);
+
+    struct ugidctl_add_rq
+    {
+        __u32 count;      /* list elements count */
+        union {
+            uid_t uid_list[];
+            gid_t gid_list[];
+        };
+    };
+
+
+    DESCRIPTION
+
+    This functions adds the list of allowed UIDs / GIDs for the file
+    descriptor in uid_list / gid_list respectively.
+
+    Both CAP_SETUID and CAP_SETGID capabilities are required.
+
+    RETURNS
+
+    This functions returns 0 if no errors occur. If an error occurs, -1
+    is returned and errno is set appropriately:
+
+        EPERM      The calling process does not have the CAP_SETUID and
+                   CAP_SETGID capabilities
+        EINVAL     uid_count / gid_count is greater than UGIDCTL_LISTMAX
+        ENOMEM     Out of memory
+        EFAULT     request has an invalid address
+
+IV. Setting UID / GID
+
+    SYNOPSIS
+
+    ioctl(fd, UGIDCTLIO_SETUID, struct ugidctl_setid_rq *request);
+    ioctl(fd, UGIDCTLIO_SETGID, struct ugidctl_setid_rq *request);
+
+    struct ugidctl_setid_rq
+    {
+        __u8 key[32];        /* access key */
+        union {
+            uid_t uid;
+            gid_t gid;
+        };
+    };
+
+    DESCRIPTION
+
+    The command UGIDCTLIO_SETUID sets the effective UID, real UID and saved
+    set-user-ID. If the calling process has no CAP_SETUID capability, the
+    key, process id (or process group id / session) and uid is checked. The
+    uid have to be in any list, added by UGIDCTLIO_ADDUIDLIST command earlier.
+
+    Completely analogously, the command UGIDCTLIO_SETGID sets the effective
+    GID, real GID and saved set-group-ID, and all of the above holds with
+    "gid" instead of "uid".
+
+    RETURNS
+
+    This functions returns 0 if no errors occur. If an error occurs, -1
+    is returned and errno is set appropriately:
+
+        EPERM      The user is not privileged, or the key, pid / pgid / sid,
+                   uid / gid check failed
+        EAGAIN     The uid does not match the current uid and uid brings
+                   process over its RLIMIT_NPROC resource limit
+                   (UGIDCTLIO_SETUID command only)
+        ENOMEM     Out of memory
+        EFAULT     request has an invalid address
+
+V. Setting supplementary GIDs
+
+    SYNOPSIS
+
+    ioctl(fd, UGIDCTLIO_SETGRUPS, struct ugidctl_setgroups_rq *request);
+
+    struct ugidctl_setgroups_rq {
+        __u8 key[32];
+        __u32 count;
+        gid_t list[0];
+    };
+
+    DESCRIPTION
+
+    This function sets the supplementary group IDs for the calling process. If
+    the calling process has no CAP_SETGID capability, the key, process id (or
+    process group id / session) and all ids in list is checked. Each gid in
+    request list have to be in any GIDs list, added by UGIDCTLIO_ADDGIDLIST
+    command earlier.
+
+    RETURNS
+
+    This functions returns 0 if no errors occur. If an error occurs, -1
+    is returned and errno is set appropriately:
+
+        EPERM      The user is not privileged, or the key, pid / pgid / sid,
+                   gid_list check failed
+        EINVAL     gid_count is greater than NGROUPS_MAX
+        ENOMEM     Out of memory
+        EFAULT     request has an invalid address
+
