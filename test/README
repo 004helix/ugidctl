@@ -1,0 +1,4 @@
+Intergation test
+
+compilation:
+# gcc -Wall -o test test.c

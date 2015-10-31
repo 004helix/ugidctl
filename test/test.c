@@ -13,11 +13,7 @@
 #include <errno.h>
 #include <grp.h>
 
-#include "ugidctl.h"
-
-//static int fd;
-//static struct ugidctl_key_rq key;
-//static struct ugidctl_key_rq key_wrong;
+#include "../ugidctl.h"
 
 void check(int rc, int error, const char *msg)
 {
