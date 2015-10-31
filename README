@@ -1,3 +1,8 @@
+ugidctl - linux kernel module
+
+   setuid(2) / setgid(2) / setgroups(2) extended interface
+   using /dev/ugidctl char-device and ioctl(2)
+
 v0.1.1
 
 I. Getting access key
