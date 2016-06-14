@@ -1,7 +1,11 @@
+Tue Jun 14 2016  Raman Shishniou <rommer@ibuffed.com>
+
+	* fedora 23 compilation / test
+
 Sun Oct 25 2015  Raman Shishniou <rommer@ibuffed.com>
 
 	* spinlock locking replaced by mutexes
-	* fix ugigctl_init error checking
+	* fix ugidctl_init error checking
 	* increase UGIDCTL_BULKSIZE to 512
 
 Fri Nov 22 2013  Raman Shishniou <rommer@active.by>
